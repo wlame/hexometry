@@ -1,8 +1,11 @@
 """Hexometry module"""
+
+import collections
+import enum
+import math
 import random
 import functools
-from collections import namedtuple
-from enum import Enum
+
 from typing import TypeAlias, Iterator
 
 
@@ -12,7 +15,7 @@ __version__ = '0.0.1'
 _FLOAT_PRECISION = 4
 
 
-class Direction(Enum): 
+class Direction(enum.Enum): 
     """Hexagonal directions"""
     NE = '↗'
     E = '→'
@@ -53,7 +56,7 @@ Route: TypeAlias = list[Direction]
 DecartCoord: TypeAlias = tuple[float, float]
 
 
-class Coord(namedtuple('Coord', ['x', 'y'])):
+class Coord(collections.namedtuple('Coord', ['x', 'y'])):
     """Hexagonal coordinate.
     While `x` and `y` are enough to identify a hexagon,
     `z` coordinate can be calculated as -x-y and is useful in some calculations.
@@ -94,7 +97,7 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
     if shuffle is True, directions in a route will be shuffled
     """
     # grad_x: {grad_y: direction} — coordinates gradients for each direction
-    XY = {  
+    gradients = {  
         0: {1: Direction.NE, -1: Direction.SW},
         1: {0: Direction.E, -1: Direction.SE},
         -1: {0: Direction.W, 1: Direction.NW},
@@ -105,12 +108,12 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
 
     route = []
     while dx != 0 or dy != 0:
-        grad_x = int(dx / abs(dx)) if dx != 0 else 0
-        grad_y = int(dy / abs(dy)) if dy != 0 else 0
+        grad_x = math.copysign(1, dx) if dx != 0 else 0
+        grad_y = math.copysign(1, dy) if dy != 0 else 0
 
-        grad_y = grad_y if grad_y in XY[grad_x] else next(iter(XY[grad_x]))
+        grad_y = grad_y if grad_y in gradients[grad_x] else next(iter(gradients[grad_x]))
 
-        route.append(XY[grad_x][grad_y])
+        route.append(gradients[grad_x][grad_y])
 
         dx -= grad_x
         dy -= grad_y

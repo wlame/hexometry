@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "hexometry"
-authors = [{name = "wlame", email = "lfx@dontstareat.me"}]
+authors = [{name = "wlame", email = "wlarne@gmail.com"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
