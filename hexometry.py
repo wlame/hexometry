@@ -6,7 +6,7 @@ import math
 import random
 import functools
 
-from typing import TypeAlias, Iterator
+from typing import TypeAlias, Iterator, Callable
 
 
 __version__ = '0.0.1'
@@ -15,8 +15,9 @@ __version__ = '0.0.1'
 _FLOAT_PRECISION = 4
 
 
-class Direction(enum.Enum): 
+class Direction(enum.Enum):
     """Hexagonal directions"""
+
     NE = '↗'
     E = '→'
     SE = '↘'
@@ -34,17 +35,17 @@ class Direction(enum.Enum):
     def __invert__(self) -> 'Direction':
         """turn 180 degrees"""
         return ---self
-    
+
     def __neg__(self) -> 'Direction':
         """turn counter-clockwise"""
         index = self._all.index(self)
         return self._all[index - 1]
-    
+
     def __pos__(self) -> 'Direction':
         """turn clockwise"""
         index = self._all.index(self)
         return self._all[(index + 1) % len(self._all)]
-    
+
     def __mul__(self, n: int) -> list['Direction']:
         return [self] * n
 
@@ -62,32 +63,33 @@ class Coord(collections.namedtuple('Coord', ['x', 'y'])):
     `z` coordinate can be calculated as -x-y and is useful in some calculations.
     Refer to this article to get the idea: https://catlikecoding.com/unity/tutorials/hex-map/part-1/
     """
+
     def __repr__(self) -> str:
         return f'[{self.x}:{self.y}]'
 
     @property
-    def __invert__(self) -> DecartCoord:
-        return functools.partial(hex_to_decart, self, scale_factor=1)
+    def __invert__(self) -> Callable[..., DecartCoord]:
+        return lambda: hex_to_decart(self, scale_factor=1)
 
     @classmethod
     def from_decart(cls, x: float, y: float, scale_factor: float = 1) -> 'Coord':
         return decart_to_hex(x, y, scale_factor=scale_factor)
-    
+
     def __rshift__(self, other: 'Coord') -> Route:
         return get_route(self, other)
-    
+
     def __lshift__(self, other: 'Coord') -> Route:
         return get_route(other, self)
 
-    def __mul__(self, route: Route) -> 'Coord':
+    def __mul__(self, route: Route) -> 'Coord':  # type: ignore
         return traverse_route(self, route)
-    
-    def __add__(self, direction: Direction) -> 'Coord':
+
+    def __add__(self, direction: Direction | str) -> 'Coord':  # type: ignore
         return get_neighbour(self, direction)
-    
+
     def __sub__(self, other: 'Coord') -> int:
         return get_distance(self, other)
-    
+
     def __round__(self, scale_factor: float = 1) -> list[DecartCoord]:
         return hex_to_decart_corners(self, scale_factor=scale_factor)
 
@@ -97,7 +99,7 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
     if shuffle is True, directions in a route will be shuffled
     """
     # grad_x: {grad_y: direction} — coordinates gradients for each direction
-    gradients = {  
+    gradients = {
         0: {1: Direction.NE, -1: Direction.SW},
         1: {0: Direction.E, -1: Direction.SE},
         -1: {0: Direction.W, 1: Direction.NW},
@@ -108,8 +110,8 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
 
     route = []
     while dx != 0 or dy != 0:
-        grad_x = math.copysign(1, dx) if dx != 0 else 0
-        grad_y = math.copysign(1, dy) if dy != 0 else 0
+        grad_x = int(math.copysign(1, dx)) if dx != 0 else 0
+        grad_y = int(math.copysign(1, dy)) if dy != 0 else 0
 
         grad_y = grad_y if grad_y in gradients[grad_x] else next(iter(gradients[grad_x]))
 
@@ -117,7 +119,7 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
 
         dx -= grad_x
         dy -= grad_y
-    
+
     if shuffle:
         random.shuffle(route)
 
@@ -126,32 +128,27 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
 
 # lambda functions for getting coordinates of a neighbour hex in a given direction
 NEIGHBOUR_GETTERS = {
-    Direction.NE: lambda x, y: (x, y+1),  # z-1
-    Direction.NE.value: lambda x, y: (x, y+1),  # z-1
-
-    Direction.E: lambda x, y: (x+1, y),  # z-1
-    Direction.E.value: lambda x, y: (x+1, y),  # z-1
-
-    Direction.SE: lambda x, y: (x+1, y-1),  # z
-    Direction.SE.value: lambda x, y: (x+1, y-1),  # z
-
-    Direction.SW: lambda x, y: (x, y-1),  # z+1
-    Direction.SW.value: lambda x, y: (x, y-1),  # z+1
-
-    Direction.W: lambda x, y: (x-1, y),  # z+1
-    Direction.W.value: lambda x, y: (x-1, y),  # z+1
-
-    Direction.NW: lambda x, y: (x-1, y+1),  # z
-    Direction.NW.value: lambda x, y: (x-1, y+1),  # z
+    Direction.NE: lambda x, y: (x, y + 1),  # z-1
+    Direction.NE.value: lambda x, y: (x, y + 1),  # z-1
+    Direction.E: lambda x, y: (x + 1, y),  # z-1
+    Direction.E.value: lambda x, y: (x + 1, y),  # z-1
+    Direction.SE: lambda x, y: (x + 1, y - 1),  # z
+    Direction.SE.value: lambda x, y: (x + 1, y - 1),  # z
+    Direction.SW: lambda x, y: (x, y - 1),  # z+1
+    Direction.SW.value: lambda x, y: (x, y - 1),  # z+1
+    Direction.W: lambda x, y: (x - 1, y),  # z+1
+    Direction.W.value: lambda x, y: (x - 1, y),  # z+1
+    Direction.NW: lambda x, y: (x - 1, y + 1),  # z
+    Direction.NW.value: lambda x, y: (x - 1, y + 1),  # z
 }
 
 
-def get_neighbour(coord: Coord, direction: Direction) -> Coord:
+def get_neighbour(coord: Coord, direction: Direction | str) -> Coord:
     """Returns the coordinate of the neighbour in the given direction"""
     return Coord(*NEIGHBOUR_GETTERS[direction](*coord))
 
 
-def get_neighbours(coord: Coord, distance: int = 1, within: bool = False) -> Iterator[Coord] | None:
+def get_neighbours(coord: Coord, distance: int = 1, within: bool = False) -> Iterator[Coord]:
     """Generator, yields neighbouring coordinates within a given distance
 
     If within is True, yields all coordinates within the distance,
@@ -218,20 +215,20 @@ def hex_to_decart(coord: Coord, scale_factor: float) -> DecartCoord:
     if scale_factor == 0:
         return (0.0, 0.0)
 
-    decart_x = 3/2 * hex_x * scale_factor
+    decart_x = 3 / 2 * hex_x * scale_factor
     decart_y = (3**0.5 / 2 * hex_x + 3**0.5 * hex_y) * scale_factor
 
     return round(decart_x, _FLOAT_PRECISION), round(decart_y, _FLOAT_PRECISION)
-    
+
 
 def decart_to_hex(x: float, y: float, scale_factor: float) -> Coord:
     """Converts a decart coordinates to a hex coordinate object"""
     if scale_factor == 0:
-        return (0, 0)
+        return Coord(0, 0)
 
-    hx = 2/3 * x
-    hy = (-1/3 * x + 3**0.5/3 * y)
-    return Coord(round(hx/scale_factor), round(hy/scale_factor))
+    hx = 2 / 3 * x
+    hy = -1 / 3 * x + 3**0.5 / 3 * y
+    return Coord(round(hx / scale_factor), round(hy / scale_factor))
 
 
 def hex_to_decart_corners(coord: Coord, scale_factor: float) -> list[DecartCoord]:
