@@ -6,7 +6,7 @@ import math
 import random
 import functools
 
-from typing import TypeAlias, Iterator, Callable
+from typing import TypeAlias, Iterator, Callable, override
 
 
 __version__ = '1.0.1'
@@ -243,3 +243,56 @@ def hex_to_decart_corners(coord: Coord, scale_factor: float) -> list[DecartCoord
         (x - scale_factor / 2, y + 3**0.5 / 2 * scale_factor),
     ]
     return [(round(x, _FLOAT_PRECISION), round(y, _FLOAT_PRECISION)) for x, y in coordinates]
+
+
+from typing import TypeVar, Generic
+
+HexValue = TypeVar('HexValue')
+
+
+class Grid(dict[Coord, HexValue]):
+    """Generic Hex Grid of some values."""
+
+    def __init__(self, default: HexValue | Callable[[Coord], HexValue]):
+        self.default: HexValue | None = None if callable(default) else default
+        self.get_default: Callable | None = default if callable(default) else None
+
+    @classmethod
+    def load_from_array(cls, array: list) -> Grid:
+        return cls(None)  # todo
+
+    def normalize(self, value: HexValue) -> HexValue:
+        return value
+
+    def __setitem__(self, key: Coord, value: HexValue) -> None:
+        super().__setitem__(key, self.normalize(value))
+
+    def __getitem__(self, key: Coord) -> HexValue | None:
+        if key in self:
+            return super().__getitem__(key)
+        elif self.get_default is not None:
+            return self.get_default(key)
+
+        return self.default
+
+
+class BlockageGrid(Grid[float]):
+    """Hex grid of float blockage values. Useful for calculating Route cost.
+    Blockage values are weights from 0.0 to 1.0
+    where 1.0 means hex at this coordinates is blocked for traversing
+    """
+
+    MIN_VALUE = 0.0
+    MAX_VALUE = 1.0
+
+    def __init__(self, default_blockage_level: float = 0.0):
+        super().__init__(default=default_blockage_level)
+
+    @override
+    def normalize(self, value: float):
+        if value < self.MIN_VALUE:
+            return self.MIN_VALUE
+        if value > self.MAX_VALUE:
+            return self.MAX_VALUE
+
+        return value
