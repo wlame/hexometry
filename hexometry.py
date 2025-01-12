@@ -26,27 +26,27 @@ class Direction(enum.Enum):
     NW = '↖'
 
     @functools.cached_property
-    def _all(self) -> list['Direction']:
-        return list(Direction)
+    def _all(self) -> list[Self]:
+        return list(Direction)  # type: ignore
 
     def __repr__(self) -> str:
         return self.value
 
-    def __invert__(self) -> 'Direction':
+    def __invert__(self) -> Self:
         """turn 180 degrees"""
         return ---self
 
-    def __neg__(self) -> 'Direction':
+    def __neg__(self) -> Self:
         """turn counter-clockwise"""
         index = self._all.index(self)
         return self._all[index - 1]
 
-    def __pos__(self) -> 'Direction':
+    def __pos__(self) -> Self:
         """turn clockwise"""
         index = self._all.index(self)
         return self._all[(index + 1) % len(self._all)]
 
-    def __mul__(self, n: int) -> list['Direction']:
+    def __mul__(self, n: int) -> list[Self]:
         return [self] * n
 
     def __hash__(self) -> int:
@@ -207,6 +207,14 @@ def traverse_route(start: Coord, route: Route) -> Coord:
     return coord
 
 
+def iterate_route(start: Coord, route: Route) -> Iterator[tuple[Direction, Coord]]:
+    """Generates pairs of Direction to next Hex and its coordinates."""
+    coord = start
+    for direction in route:
+        coord = get_neighbour(coord, direction)
+        yield direction, coord
+
+
 def hex_to_decart(coord: Coord, scale_factor: float) -> DecartCoord:
     """Converts a hex coordinate to a decart coordinates
     assuming the (0, 0) coordinates are matched in hex grid and decart grid
@@ -257,15 +265,11 @@ class Grid(dict[Coord, HexValue]):
         self.default: HexValue | None = None if callable(default) else default
         self.get_default: Callable | None = default if callable(default) else None
 
-    @classmethod
-    def load_from_array(cls, array: list) -> Grid:
-        return cls(None)  # todo
-
-    def normalize(self, value: HexValue) -> HexValue:
+    def normalize(self, hex: Coord, value: HexValue) -> HexValue:
         return value
 
     def __setitem__(self, key: Coord, value: HexValue) -> None:
-        super().__setitem__(key, self.normalize(value))
+        super().__setitem__(key, self.normalize(key, value))
 
     def __getitem__(self, key: Coord) -> HexValue | None:
         if key in self:
