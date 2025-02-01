@@ -4,11 +4,34 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "hexometry"
-authors = [{name = "wlame", email = "wlarne@gmail.com"}]
+requires-python = ">=3.10"
+authors = [{ name = "wlame", email = "wlarne@gmail.com" }]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = ["License :: OSI Approved :: MIT License"]
 dynamic = ["version", "description"]
+dependencies = []
 
 [project.urls]
 Home = "https://github.com/wlame/hexometry"
+
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.6",
+]
+
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120
+
+
+[tool.ruff.lint]
+ignore = ["E501"]
+# Avoid enforcing line-length violations (`E501`)
+
+[tool.ruff.format]
+quote-style = "single"
+skip-magic-trailing-comma = false
