@@ -8,7 +8,7 @@ import functools
 
 from collections import namedtuple
 from enum import Enum
-from typing import Iterator, Callable, Self, TypeAlias
+from typing import Callable, TypeAlias, Self, Iterator
 
 __version__ = '1.0.1'
 
