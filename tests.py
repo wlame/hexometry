@@ -43,7 +43,11 @@ def test_direction_turns():
     assert ~Direction.W == Direction.E
 
     assert ~Direction.SE == Direction.NW
-    assert Direction.NW == ~Direction.SE
+    assert ~Direction.NW == Direction.SE
+
+    assert ~Direction.NE == Direction.SW
+    assert ~Direction.SW == Direction.NE
+
 
 
 def test_direction_multiplication():
@@ -95,10 +99,10 @@ def test_get_neighbor_by_direction(coordinates, nearest_neighbours):
         assert get_neighbour(c, direction.value) == Coord(*expected_neighbour)
         assert get_neighbour(coordinates, direction) == Coord(*expected_neighbour)
         assert get_neighbour(coordinates, direction.value) == Coord(*expected_neighbour)
-    
+
 
 @pytest.mark.parametrize('coordinates, neighbours_by_distance', neighbours_by_coordinates.items())
-def test_get_neighbors_by_distance(coordinates, neighbours_by_distance):    
+def test_get_neighbors_by_distance(coordinates, neighbours_by_distance):
     c = Coord(*coordinates)
 
     for distance, expected_neighbours in neighbours_by_distance.items():
@@ -129,8 +133,8 @@ def test_coord_repr():
 
 
 def test_get_neighbor_for_big_distance_works():
-    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000
-    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900
+    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000  # type: ignore
+    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900  # type: ignore
 
 
 def test_get_directed_neighbours():
@@ -200,7 +204,6 @@ def test_get_distance():
     assert c1 - c2 == c2 - c1
 
 
-
 coordinates_test_cases = [
     # hex_xy, scale_factor, dec_xy
     ((0, 0), 1, (0.0, 0.0)),
@@ -233,7 +236,6 @@ def test_decart_to_hex(hex_xy, scale_factor, dec_xy):
     assert decart_to_hex(*hex_to_decart(hex_xy, scale_factor=scale_factor), scale_factor=scale_factor) == hex_xy
 
 
-
 def test_coord_from_decart():
     assert Coord.from_decart(*~Coord(23, 45)) == Coord(23, 45)
 
@@ -241,13 +243,16 @@ def test_coord_from_decart():
     assert Coord.from_decart(184.9, -683.3) == Coord(123, -456)
     assert Coord.from_decart(185, -683) == Coord(123, -456)
 
-    assert Coord.from_decart(-579.60675, 2146.568238, scale_factor=3.14) == Coord(-123, 456)
+    assert Coord.from_decart(-579.60675, 2146.568238,
+                             scale_factor=3.14) == Coord(-123, 456)
 
 
 hex_corners_coordinates_test_cases = [
     # hex_xy, scale_factor, expected_xy
-    ((0, 0), 1, [(0.5, 0.866), (1.0, 0.0), (0.5, -0.866), (-0.5, -0.866), (-1.0, 0.0), (-0.5, 0.866)]),
-    ((0, 0), 2, [(1.0, 1.7321), (2.0, 0.0), (1.0, -1.7321), (-1.0, -1.7321), (-2.0, 0.0), (-1.0, 1.7321)]),
+    ((0, 0), 1, [(0.5, 0.866), (1.0, 0.0), (0.5, -0.866),
+     (-0.5, -0.866), (-1.0, 0.0), (-0.5, 0.866)]),
+    ((0, 0), 2, [(1.0, 1.7321), (2.0, 0.0), (1.0, -1.7321),
+     (-1.0, -1.7321), (-2.0, 0.0), (-1.0, 1.7321)]),
     (
         (-4, 3),
         1,
@@ -270,7 +275,7 @@ hex_corners_coordinates_test_cases = [
             (21.255, -2.8319),
             (22.89, -5.6638),
             (21.255, -8.4957),
-        ]
+        ],
     ),
 ]
 
