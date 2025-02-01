@@ -17,11 +17,8 @@ Home = "https://github.com/wlame/hexometry"
 
 
 [dependency-groups]
-dev = [
-    "pytest>=8.3.4",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.8.6",
-]
+dev = ["pytest>=8.3.4", "pytest-cov>=6.0.0", "ruff>=0.8.6"]
+
 
 [tool.ruff]
 # Allow lines to be as long as 120.
