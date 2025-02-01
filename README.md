@@ -1,2 +1,36 @@
-# pyhex
-PYthon library to work with hexagon grid geometry.
+# Hexometry
+Python library to work with hexagon grid geometry.
+
+## Overview
+Hexometry is a Python library to work with hexagon grid geometry.
+Some ideas of having x, y, z coordinates for hexagon grid are taken from [this article](https://catlikecoding.com/unity/tutorials/hex-map/part-1/) by Jasper Flick.
+
+Particulary this image gives a good idea of a choosen coordinates for hexagon grid:
+![hex grid coordinates example](https://catlikecoding.com/unity/tutorials/hex-map/part-1/hexagonal-coordinates/cube-diagram.png)
+
+## Installation
+For now it is not available on PyPI, so you can install it from the source code:
+```bash
+git clone git@github.com:wlame/hexometry.git
+pip install -e hexometry
+```
+
+## Usage
+```python
+from hexometry import Coord, Direction, Route
+
+c1 = Coord(0, 0)
+c2 = Coord(2, 3)
+print(f"Coordinates {c1} and {c2} on a field are {c1-c2} hexes away each other")
+
+route = c1 >> c2
+print(f"and the route between them are: {route}. Let's traverse it:")
+
+coord = c1
+for direction in route:
+    coord += direction
+    print(f"moving {direction.value} to {coord}")
+
+assert coord == c2
+print("here we are")
+```
