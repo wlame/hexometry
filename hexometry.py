@@ -10,7 +10,7 @@ from collections import namedtuple
 from enum import Enum
 from typing import Iterator, Callable, Self, TypeAlias
 
-__version__ = '0.0.1'
+__version__ = '1.0.0'
 
 
 _FLOAT_PRECISION = 4
