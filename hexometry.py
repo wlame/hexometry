@@ -6,7 +6,7 @@ import math
 import random
 import functools
 
-from typing import TypeAlias, Iterator, Callable
+from typing import TypeAlias, Iterator, Callable, Self
 
 
 __version__ = '1.0.1'
@@ -26,27 +26,27 @@ class Direction(enum.Enum):
     NW = '↖'
 
     @functools.cached_property
-    def _all(self) -> list['Direction']:
+    def _all(self) -> list[Self]:
         return list(Direction)
 
     def __repr__(self) -> str:
         return self.value
 
-    def __invert__(self) -> 'Direction':
+    def __invert__(self) -> Self:
         """turn 180 degrees"""
         return ---self
 
-    def __neg__(self) -> 'Direction':
+    def __neg__(self) -> Self:
         """turn counter-clockwise"""
         index = self._all.index(self)
         return self._all[index - 1]
 
-    def __pos__(self) -> 'Direction':
+    def __pos__(self) -> Self:
         """turn clockwise"""
         index = self._all.index(self)
         return self._all[(index + 1) % len(self._all)]
 
-    def __mul__(self, n: int) -> list['Direction']:
+    def __mul__(self, n: int) -> list[Self]:
         return [self] * n
 
     def __hash__(self) -> int:
@@ -72,22 +72,22 @@ class Coord(collections.namedtuple('Coord', ['x', 'y'])):
         return lambda: hex_to_decart(self, scale_factor=1)
 
     @classmethod
-    def from_decart(cls, x: float, y: float, scale_factor: float = 1) -> 'Coord':
+    def from_decart(cls, x: float, y: float, scale_factor: float = 1) -> Self:
         return decart_to_hex(x, y, scale_factor=scale_factor)
 
-    def __rshift__(self, other: 'Coord') -> Route:
+    def __rshift__(self, other: Self) -> Route:
         return get_route(self, other)
 
-    def __lshift__(self, other: 'Coord') -> Route:
+    def __lshift__(self, other: Self) -> Route:
         return get_route(other, self)
 
-    def __mul__(self, route: Route) -> 'Coord':  # type: ignore
+    def __mul__(self, route: Route) -> Self:
         return traverse_route(self, route)
 
-    def __add__(self, direction: Direction | str) -> 'Coord':  # type: ignore
+    def __add__(self, direction: Direction) -> Self:
         return get_neighbour(self, direction)
 
-    def __sub__(self, other: 'Coord') -> int:
+    def __sub__(self, other: Self) -> int:
         return get_distance(self, other)
 
     def __round__(self, scale_factor: float = 1) -> list[DecartCoord]:
