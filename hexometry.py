@@ -1,10 +1,14 @@
 """Hexometry module"""
+
+import collections
+import enum
+import math
 import random
 import functools
+
 from collections import namedtuple
 from enum import Enum
 from typing import Iterator, Self, TypeAlias
-
 
 __version__ = '0.0.1'
 
@@ -12,7 +16,7 @@ __version__ = '0.0.1'
 _FLOAT_PRECISION = 4
 
 
-class Direction(Enum): 
+class Direction(enum.Enum):
     """Hexagonal directions"""
     NE = '↗'
     E = '→'
@@ -31,17 +35,17 @@ class Direction(Enum):
     def __invert__(self) -> Self:
         """turn 180 degrees"""
         return ---self
-    
+
     def __neg__(self) -> Self:
         """turn counter-clockwise"""
         index = self._all.index(self)
         return self._all[index - 1]
-    
+
     def __pos__(self) -> Self:
         """turn clockwise"""
         index = self._all.index(self)
         return self._all[(index + 1) % len(self._all)]
-    
+
     def __mul__(self, n: int) -> list[Self]:
         return [self] * n
 
@@ -53,7 +57,7 @@ Route: TypeAlias = list[Direction]
 DecartCoord: TypeAlias = tuple[float, float]
 
 
-class Coord(namedtuple('Coord', ['x', 'y'])):
+class Coord(collections.namedtuple('Coord', ['x', 'y'])):
     """Hexagonal coordinate.
     While `x` and `y` are enough to identify a hexagon,
     `z` coordinate can be calculated as -x-y and is useful in some calculations.
@@ -69,22 +73,22 @@ class Coord(namedtuple('Coord', ['x', 'y'])):
     @classmethod
     def from_decart(cls, x: float, y: float, scale_factor: float = 1) -> Self:
         return decart_to_hex(x, y, scale_factor=scale_factor)
-    
+
     def __rshift__(self, other: Self) -> Route:
         return get_route(self, other)
-    
+
     def __lshift__(self, other: Self) -> Route:
         return get_route(other, self)
 
     def __mul__(self, route: Route) -> Self:
         return traverse_route(self, route)
-    
+
     def __add__(self, direction: Direction) -> Self:
         return get_neighbour(self, direction)
-    
+
     def __sub__(self, other: Self) -> int:
         return get_distance(self, other)
-    
+
     def __round__(self, scale_factor: float = 1) -> list[DecartCoord]:
         return hex_to_decart_corners(self, scale_factor=scale_factor)
 
@@ -94,7 +98,7 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
     if shuffle is True, directions in a route will be shuffled
     """
     # grad_x: {grad_y: direction} — coordinates gradients for each direction
-    XY = {  
+    gradients = {
         0: {1: Direction.NE, -1: Direction.SW},
         1: {0: Direction.E, -1: Direction.SE},
         -1: {0: Direction.W, 1: Direction.NW},
@@ -105,16 +109,16 @@ def get_route(start: Coord, end: Coord, shuffle: bool = False) -> Route:
 
     route = []
     while dx != 0 or dy != 0:
-        grad_x = int(dx / abs(dx)) if dx != 0 else 0
-        grad_y = int(dy / abs(dy)) if dy != 0 else 0
+        grad_x = math.copysign(1, dx) if dx != 0 else 0
+        grad_y = math.copysign(1, dy) if dy != 0 else 0
 
-        grad_y = grad_y if grad_y in XY[grad_x] else next(iter(XY[grad_x]))
+        grad_y = grad_y if grad_y in gradients[grad_x] else next(iter(gradients[grad_x]))
 
-        route.append(XY[grad_x][grad_y])
+        route.append(gradients[grad_x][grad_y])
 
         dx -= grad_x
         dy -= grad_y
-    
+
     if shuffle:
         random.shuffle(route)
 
@@ -219,7 +223,7 @@ def hex_to_decart(coord: Coord, scale_factor: float) -> DecartCoord:
     decart_y = (3**0.5 / 2 * hex_x + 3**0.5 * hex_y) * scale_factor
 
     return round(decart_x, _FLOAT_PRECISION), round(decart_y, _FLOAT_PRECISION)
-    
+
 
 def decart_to_hex(x: float, y: float, scale_factor: float) -> Coord:
     """Converts a decart coordinates to a hex coordinate object"""
