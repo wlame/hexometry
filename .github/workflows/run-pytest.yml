@@ -27,6 +27,6 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv sync
       - name: Run tests
-        run: uv run pytest --cov=hexometry --cov-fail-under=100 tests.py
+        run: uv run pytest --cov-report=term-missing --cov=hexometry --cov-fail-under=100 src/tests
       - name: Lint
         run: uv run ruff check
