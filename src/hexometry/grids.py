@@ -2,7 +2,7 @@ import heapq
 
 from typing import Callable, Iterator, TypeVar
 
-from .coordinates import Coord, Route, get_directed_neighbours
+from .coordinates import Coord, Direction, Route, get_directed_neighbours
 
 
 HexValue = TypeVar('HexValue')

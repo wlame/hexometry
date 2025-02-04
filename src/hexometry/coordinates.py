@@ -4,7 +4,7 @@ import math
 import random
 import functools
 
-from typing import TypeAlias, Iterator, Callable, Self, override
+from typing import TypeAlias, Iterator, Callable, Self
 
 
 _FLOAT_PRECISION = 4

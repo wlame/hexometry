@@ -6,7 +6,7 @@ import types
 import pytest
 
 
-from hexometry import (
+from hexometry.coordinates import (
     Coord,
     Direction,
     Route,
