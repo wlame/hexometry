@@ -5,10 +5,12 @@ import types
 
 import pytest
 
-from hexometry import (
+
+from hexometry.coordinates import (
     Coord,
     Direction,
     Route,
+    iterate_route,
     get_route,
     get_directed_neighbours,
     hex_to_decart,
@@ -133,8 +135,8 @@ def test_coord_repr():
 
 
 def test_get_neighbor_for_big_distance_works():
-    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000  # type: ignore
-    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900  # type: ignore
+    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000
+    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900
 
 
 def test_get_directed_neighbours():
@@ -289,3 +291,28 @@ def test_hex_to_decart_corners(hex_xy, scale_factor, expected_corners_coordinate
 
     if scale_factor == 1:
         assert round(c) == hex_to_decart_corners(c, scale_factor=1)
+
+
+def test_iterate_route():
+    c1 = Coord(0, 0)
+    route = ['↗', '→', '→', '↘', '←']
+    expected_coordinates = [
+        Coord(0, 1),
+        Coord(1, 1),
+        Coord(2, 1),
+        Coord(3, 0),
+        Coord(2, 0),
+    ]
+
+    route_iterator = iterate_route(c1, route)
+    for step, (direction, coord) in enumerate(route_iterator):
+        assert direction == route[step]
+        assert coord == expected_coordinates[step]
+
+
+def test_iterate_route_with_empty_route():
+    coord = Coord(random.randint(-100, 100), random.randint(-100, 100))
+    route_iterator = iterate_route(coord, Route())
+
+    with pytest.raises(StopIteration):
+        next(route_iterator)

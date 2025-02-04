@@ -1,5 +1,3 @@
-"""Hexometry module"""
-
 import collections
 import enum
 import math
@@ -7,9 +5,6 @@ import random
 import functools
 
 from typing import TypeAlias, Iterator, Callable, Self
-
-
-__version__ = '1.0.1'
 
 
 _FLOAT_PRECISION = 4
@@ -205,6 +200,14 @@ def traverse_route(start: Coord, route: Route) -> Coord:
     for direction in route:
         coord = get_neighbour(coord, direction)
     return coord
+
+
+def iterate_route(start: Coord, route: Route) -> Iterator[tuple[Direction, Coord]]:
+    """Generates pairs of Direction to next Hex and its coordinates."""
+    coord = start
+    for direction in route:
+        coord = get_neighbour(coord, direction)
+        yield direction, coord
 
 
 def hex_to_decart(coord: Coord, scale_factor: float) -> DecartCoord:
