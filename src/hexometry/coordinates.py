@@ -22,7 +22,7 @@ class Direction(enum.Enum):
 
     @functools.cached_property
     def _all(self) -> list[Self]:
-        return list(Direction)  # type: ignore
+        return list(Direction)
 
     def __repr__(self) -> str:
         return self.value

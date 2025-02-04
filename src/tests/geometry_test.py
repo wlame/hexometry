@@ -135,8 +135,8 @@ def test_coord_repr():
 
 
 def test_get_neighbor_for_big_distance_works():
-    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000  # type: ignore
-    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900  # type: ignore
+    assert len(list(get_neighbours((123, 234), distance=3000))) == 18000
+    assert len(list(get_neighbours((123, 234), distance=300, within=True))) == 270900
 
 
 def test_get_directed_neighbours():
