@@ -1,6 +1,6 @@
 import heapq
 
-from typing import Callable, Iterator, TypeVar, override
+from typing import Callable, Iterator, TypeVar
 
 from .coordinates import Coord, Route, get_directed_neighbours
 
@@ -48,7 +48,6 @@ class BlockageGrid(Grid[float]):
     def __init__(self, default_blockage_level: float = 0.0):
         super().__init__(default=default_blockage_level)
 
-    @override
     def normalize(self, hex: Coord, value: float):
         if value < self.MIN_VALUE:
             return self.MIN_VALUE
